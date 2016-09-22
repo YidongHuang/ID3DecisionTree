@@ -1,7 +1,10 @@
+import sys, traceback
+import pprint
+
 class Attribute:
     def __init__(self, name):
         self._name = name
-        self._value = [];
+        self._value = []
         self._nominal = True
 
     def append_val(self, new_val):
@@ -19,8 +22,7 @@ class Attribute:
     def value(self):
         return self._value
 
-    @value.setter
-    def value(self, new_val):
+    def set_value(self, new_val):
         self._value = new_val
 
     @property
@@ -30,11 +32,21 @@ class Attribute:
     def not_nominal(self):
         self._nominal = False
 
+    def __str__(self):
+        return "{} {}".format(self._name, self._value)
+
 class ARFF:
-    def __init__(self, attributes, data):
+    def __init__(self, fname):
         self._attributes = []
         self._data = []
         self._relation = ""
+        self._read_file(fname)
+
+    def to_string(self):
+        for i in range(len(self._attributes)):
+            print self._attributes[i]
+        return '\n'.join( [ str(data) for data in self._data ])
+
 
     @property
     def relation(self):
@@ -60,9 +72,9 @@ class ARFF:
     def data(self, value):
         self._data = value
 
-    def read_file(self, fname):
+    def _read_file(self, fname):
         file = open(fname)
-
+        numeric = []
         stage = 0
         try:
             for line in file:
@@ -80,8 +92,8 @@ class ARFF:
                     attrs = attrs.replace("}", "").strip()
                     attrs = attrs.replace(" ","").strip()
                     attr_vals = attrs.split(",")
-                    if attr_vals.count() > 1 :
-                        attr.value = attr_vals
+                    if len(attr_vals) > 1 :
+                        attr.set_value(attr_vals)
                     else:
                         attr.value = []
                         attr.not_nominal()
@@ -89,15 +101,26 @@ class ARFF:
                     continue
 
                 elif stage == 1 and line[0:5].lower() == "@data":
+                    for i in range(len(self._attributes)):
+                        if self._attributes[i].nominal is not True:
+                            numeric.append(i)
                     stage = 2
                     continue
 
                 elif stage == 2:
+                    line = line.strip()
+                    vals = line.split(",")
+                    for i in range(len(numeric)):
+                        self._attributes[numeric[i]].append_val(vals[numeric[i]])
+                    self._data.append(vals)
+                    continue
 
-
+                else:
+                    raise Exception("Bad formed ARFF")
 
         except:
             print "something went wrong when reading {}".format(fname)
+            traceback.print_exc(file=sys.stdout)
             exit()
 
 
