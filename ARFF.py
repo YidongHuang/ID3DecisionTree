@@ -62,18 +62,43 @@ class ARFF:
 
     def read_file(self, fname):
         file = open(fname)
-        attributes = []
-        stage = 0
-        for line in file:
-            if stage == 0 and line[0:9].lower() == "@relation":
-                self.relation = line[9:].strip()
-                stage = 1
-                continue
 
-            elif stage == 1 and line[0:10].lower() == "@attribute":
-                spaced_line = line[10:].replace("\t", " ").strip()
-                splitted_attr = spaced_line.split(" ")
-                attr = Attribute(splitted_attr[0])
+        stage = 0
+        try:
+            for line in file:
+                if stage == 0 and line[0:9].lower() == "@relation":
+                    self.relation = line[9:].strip()
+                    stage = 1
+                    continue
+
+                elif stage == 1 and line[0:10].lower() == "@attribute":
+                    spaced_line = line[10:].replace("\t", " ").strip()
+                    splited_attr = spaced_line.split(" ")
+                    attr = Attribute(splited_attr[0])
+                    attrs = spaced_line.replace(splited_attr[0], "").strip()
+                    attrs = attrs.replace("{","").strip()
+                    attrs = attrs.replace("}", "").strip()
+                    attrs = attrs.replace(" ","").strip()
+                    attr_vals = attrs.split(",")
+                    if attr_vals.count() > 1 :
+                        attr.value = attr_vals
+                    else:
+                        attr.value = []
+                        attr.not_nominal()
+                    self._attributes.append(attr)
+                    continue
+
+                elif stage == 1 and line[0:5].lower() == "@data":
+                    stage = 2
+                    continue
+
+                elif stage == 2:
+
+
+
+        except:
+            print "something went wrong when reading {}".format(fname)
+            exit()
 
 
 
