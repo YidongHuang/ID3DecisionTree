@@ -42,7 +42,7 @@ class ARFF:
         self._relation = ""
         self._read_file(fname)
 
-    def to_string(self):
+    def __str__(self):
         for i in range(len(self._attributes)):
             print self._attributes[i]
         return '\n'.join( [ str(data) for data in self._data ])
