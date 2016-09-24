@@ -22,7 +22,7 @@ class Attribute:
     def value(self):
         return self._value
 
-    def set_value(self, new_val):
+    def value_setter(self, new_val):
         self._value = new_val
 
     @property
@@ -93,9 +93,9 @@ class ARFF:
                     attrs = attrs.replace(" ","").strip()
                     attr_vals = attrs.split(",")
                     if len(attr_vals) > 1 :
-                        attr.set_value(attr_vals)
+                        attr.value_setter(attr_vals)
                     else:
-                        attr.value = []
+                        attr.value_setter([])
                         attr.not_nominal()
                     self._attributes.append(attr)
                     continue
@@ -118,10 +118,13 @@ class ARFF:
                 else:
                     raise Exception("Bad formed ARFF")
 
+
         except:
             print "something went wrong when reading {}".format(fname)
             traceback.print_exc(file=sys.stdout)
             exit()
+
+
 
 
 

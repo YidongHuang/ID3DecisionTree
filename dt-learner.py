@@ -18,10 +18,7 @@ def main(argv):
     pos_classification = input_file.attributes[classification_index].value[0]
     neg_classification = input_file.attributes[classification_index].value[1]
 
-    print pos_classification
-    print neg_classification
-
-    print classification_index
+    '''print input_file'''
 
 def cal_entropy(set):
     pos_res = 0
@@ -34,6 +31,20 @@ def cal_entropy(set):
         return 0
     prob = pos_res / len(set)
     return -(prob * math.log(prob, 2) + (1 - prob) * math.log(1 - prob, 2))
+
+
+def grow_tree(set, node):
+
+def split_set(set, attr_name):
+    possible_vals = []
+    for attr in input_file.attributes:
+        if attr.name is attr_name:
+            possible_vals = attr.value()
+    branches = range(len(possible_vals))
+    for element in set:
+
+
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
