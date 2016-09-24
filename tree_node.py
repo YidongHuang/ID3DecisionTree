@@ -1,7 +1,7 @@
-class tree_node:
+class Tree_node:
     def __init__(self):
         self._name = ""
-        self._available_attr = []
+        self._available_attr_index = []
         self._entropy = 1
 
     @property
@@ -14,11 +14,11 @@ class tree_node:
 
     @property
     def available_attr(self):
-        return self._available_attr
+        return self._available_attr_index
 
     @available_attr.setter
     def available_attr(self, new_list):
-        self._available_attr = new_list
+        self._available_attr_index = new_list
 
     @property
     def entropy(self):
