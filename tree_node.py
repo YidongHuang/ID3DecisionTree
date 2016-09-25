@@ -54,3 +54,9 @@ class Tree_node:
     @parent_common_class.setter
     def name(self, new_val):
         self._parent_common_class = new_val
+
+    def print_tree(self, blank):
+        print self.name
+        print "{}{}".format(blank, self._name)
+        for child in self._children:
+            self.print_tree("    {}".format(blank))
