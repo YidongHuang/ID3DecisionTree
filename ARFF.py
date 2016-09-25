@@ -111,7 +111,8 @@ class ARFF:
                     line = line.strip()
                     vals = line.split(",")
                     for i in range(len(numeric)):
-                        self._attributes[numeric[i]].append_val(vals[numeric[i]])
+                        self._attributes[numeric[i]].append_val(float(vals[numeric[i]]))
+                        vals[numeric[i]] = float(vals[numeric[i]])
                     self._data.append(vals)
                     continue
 

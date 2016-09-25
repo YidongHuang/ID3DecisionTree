@@ -3,6 +3,8 @@ class Tree_node:
         self._name = ""
         self._available_attr_index = []
         self._entropy = 1
+        self._threshold = "nominal"
+        self._children = []
 
     @property
     def name(self):
@@ -13,11 +15,11 @@ class Tree_node:
         self._name = new_name
 
     @property
-    def available_attr(self):
+    def available_attr_index(self):
         return self._available_attr_index
 
-    @available_attr.setter
-    def available_attr(self, new_list):
+    @available_attr_index.setter
+    def available_attr_index(self, new_list):
         self._available_attr_index = new_list
 
     @property
@@ -27,3 +29,19 @@ class Tree_node:
     @entropy.setter
     def entropy(self, new_entropy):
         self._entropy = new_entropy
+
+    @property
+    def threshold(self):
+        return self._threshold
+
+    @threshold.setter
+    def threshold(self, new_threshold):
+        self._threshold = new_threshold
+
+    @property
+    def children(self):
+        return self._children
+
+    @children.setter
+    def children(self, new_children):
+        self._children = new_children
