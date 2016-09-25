@@ -5,6 +5,7 @@ class Tree_node:
         self._entropy = 1
         self._threshold = "nominal"
         self._children = []
+        self._parent_common_class = ""
 
     @property
     def name(self):
@@ -45,3 +46,11 @@ class Tree_node:
     @children.setter
     def children(self, new_children):
         self._children = new_children
+
+    @property
+    def parent_common_class(self):
+        return self._parent_common_class
+
+    @parent_common_class.setter
+    def name(self, new_val):
+        self._parent_common_class = new_val

@@ -20,7 +20,6 @@ class Tree:
 
     def cal_entropy(self, set):
         pos_res = 0
-        print len(set)
         for element in set:
             if element[self._classification_index] == self._pos_classification:
                 pos_res = pos_res + 1
@@ -57,21 +56,19 @@ class Tree:
 
 
     def fill_split_condition(self, node, set):
+        parent_common_class = self.get_parent_common_class(set)
         avail_attr_index = node.available_attr_index
         max_info_gain = 0
-        divided_sets = []
+        divided_sets = [[],[]]
         divided_entropy_list = []
         for index in avail_attr_index:
-            print self._dtree.attributes[index].name
             if self._dtree.attributes[index].nominal is True:
                 result_sets = self.split_set(set, index, 0)
                 entropy_list = self.get_entropy_list(result_sets)
                 info_gain = self.get_info_gain(set, entropy_list, result_sets, node)
-                '''print entropy'''
                 if max_info_gain < info_gain:
                     node.name = self._dtree.attributes[index].name
                     max_info_gain = info_gain
-                    divided_sets = result_sets
                     divided_entropy_list = entropy_list
             else:
                 mid_points = self.get_midpoints(set, index)
@@ -79,21 +76,20 @@ class Tree:
                     result_sets = self.split_set(set, index, mid_point)
                     entropy_list = self.get_entropy_list(result_sets)
                     info_gain = self.get_info_gain(set, entropy_list, result_sets, node)
-                    '''print entropy'''
                     if max_info_gain < info_gain or(max_info_gain == info_gain and mid_point < node.threshold):
                         node.name = self._dtree.attributes[index].name
                         max_info_gain = info_gain
                         node.threshold = mid_point
-                        divided_sets = result_sets
                         divided_entropy_list = entropy_list
 
-        for i in range(len(node.available_attr_index)):
+        children_avail_attr_index = node.available_attr_index[:]
+        for i in range(len(children_avail_attr_index)):
             if self._dtree.attributes[node.available_attr_index[i]] == node.name:
                 if self._dtree.attributes[node.available_attr_index[i]].nominal is True:
-                    to_remove = node.available_attr_index[i]
-                    node.available_attr_index.remove(to_remove)
+                    to_remove = children_avail_attr_index[i]
+                    children_avail_attr_index.remove(to_remove)
                 break
-        print divided_sets
+        node.children = self.make_children(divided_entropy_list, parent_common_class, children_avail_attr_index)
         return divided_sets
 
     def clean_up(self):
@@ -131,6 +127,26 @@ class Tree:
         for i in range(len(result_sets)):
             entropy = entropy + len(result_sets[i]) * 1.0 / len(set) * 1 * entropy_list[i]
         return node.entropy - entropy
+
+    def make_children(self, entropy_list, parent_common_class, avail_list):
+        children = []
+        child_avail_attr_index = avail_list[:]
+        for entropy in entropy_list:
+            node = tree_node.Tree_node()
+            node.entropy = entropy
+            node.parent_common_class = parent_common_class
+            node.available_attr_index = child_avail_attr_index
+            children.append(node)
+        return children
+
+    def get_parent_common_class(self, set):
+        pos_res = 0
+        for element in set:
+            if element[self._classification_index] == self._pos_classification:
+                pos_res = pos_res + 1
+        if pos_res * 2 >= len(set):
+            return self._pos_classification
+        return self._neg_classification
 
 
 
