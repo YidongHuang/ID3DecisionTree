@@ -7,7 +7,7 @@ def main(argv):
     output_fname = argv[1]
     criterion = argv[2]
 
-    tree = dtree.Tree(input_fname)
+    tree = dtree.Tree(input_fname, criterion)
 
 
 if __name__ == "__main__":
