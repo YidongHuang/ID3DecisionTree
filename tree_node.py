@@ -6,6 +6,8 @@ class Tree_node:
         self._threshold = "nominal"
         self._children = []
         self._parent_common_class = ""
+        self._result = ""
+        self._condition = ""
 
     @property
     def name(self):
@@ -14,6 +16,14 @@ class Tree_node:
     @name.setter
     def name(self, new_name):
         self._name = new_name
+
+    @property
+    def result(self):
+        return self._result
+
+    @result.setter
+    def result(self, new_result):
+        self._result = new_result
 
     @property
     def available_attr_index(self):
@@ -55,8 +65,15 @@ class Tree_node:
     def name(self, new_val):
         self._parent_common_class = new_val
 
+    @property
+    def condition(self):
+        self._condition
+
+    def append_condition(self, addition):
+        self._condition.join([addition])
+
+
     def print_tree(self, blank):
-        print self.name
-        print "{}{}".format(blank, self._name)
-        for child in self._children:
-            self.print_tree("    {}".format(blank))
+        print "{}{} {}".format(blank, self.name, self.result)
+        for child in self.children:
+            child.print_tree("    {}".format(blank))
