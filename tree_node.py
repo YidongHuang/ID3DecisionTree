@@ -70,10 +70,11 @@ class Tree_node:
         self._condition
 
     def append_condition(self, addition):
-        self._condition.join([addition])
-
+        self._condition = self._condition + addition
 
     def print_tree(self, blank):
-        print "{}{} {}".format(blank, self.name, self.result)
+        if self._condition != '':
+            print "{}{}".format(blank, self._condition)
+            blank = blank + " |       "
         for child in self.children:
-            child.print_tree("    {}".format(blank))
+            child.print_tree("{}".format(blank))

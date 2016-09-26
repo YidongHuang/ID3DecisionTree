@@ -11,9 +11,9 @@ class Tree:
         self._neg_classification = self._dtree.attributes[self._classification_index].value[1]
         self._criterion = int(criterion)
         self.clean_up()
-        self.test()
+        self.build_tree()
 
-    def test(self):
+    def build_tree(self):
         node = tree_node.Tree_node()
         node.available_attr_index = range(len(self._dtree.attributes) - 1)
         self.fill_split_condition(node, self._dtree.data)
@@ -96,6 +96,7 @@ class Tree:
             node.result = common_class
             node.append_condition(": {}".format(common_class))
             return
+
         '''Remove entry from attr index for children'''
         children_avail_attr_index = node.available_attr_index[:]
         for i in range(len(children_avail_attr_index)):
@@ -106,7 +107,7 @@ class Tree:
                 break
 
         '''Make children nodes'''
-        node.children = self.make_children(divided_entropy_list, common_class, children_avail_attr_index, divided_index, divided_dist_result)
+        node.children = self.make_children(divided_entropy_list, common_class, children_avail_attr_index, divided_index, divided_dist_result, node.threshold)
         grow_index = self.growing_index(divided_result_sets, node)
         for i in grow_index:
             self.fill_split_condition(node.children[i], divided_result_sets[i])
@@ -138,7 +139,7 @@ class Tree:
             entropy = entropy + len(result_sets[i]) * 1.0 / len(set) * entropy_list[i]
         return node.entropy - entropy
 
-    def make_children(self, entropy_list, parent_common_class, avail_list, index, divided_dist_result):
+    def make_children(self, entropy_list, parent_common_class, avail_list, index, divided_dist_result, threshold):
         children = []
         child_avail_attr_index = avail_list[:]
         for i in range(len(entropy_list)):
@@ -146,7 +147,7 @@ class Tree:
             node.entropy = entropy_list[i]
             node.parent_common_class = parent_common_class
             node.available_attr_index = child_avail_attr_index
-            self.fill_condition(node, index, i, divided_dist_result)
+            self.fill_condition(node, index, i, divided_dist_result, threshold)
             children.append(node)
         return children
 
@@ -162,16 +163,24 @@ class Tree:
     def growing_index(self, divided_result_sets, node):
         more_split = []
         for i in range(len(divided_result_sets)):
-            '''print node.name'''
             if node.children[i].entropy == 0 or len(divided_result_sets[i]) < self._criterion:
                 node.children[i].name = self.get_common_class(divided_result_sets[i])
+                node.children[i].append_condition(': {}'.format(node.children[i].name))
             else:
                 more_split.append(i)
         return more_split
 
-    def fill_condition(self, node, index, i, divided_dist_result):
-        node.result = " = {} {}".format(self._dtree.attributes[index].name, divided_dist_result[i])
-
+    def fill_condition(self, node, index, i, divided_dist_result, threshold):
+        tree_attributes = self._dtree.attributes[index]
+        prev_split_name = tree_attributes.name
+        op = "?"
+        if tree_attributes.nominal:
+            op = " = {}".format(self._dtree.attributes[index].value[i])
+        elif i == 0:
+            op = " <= {}".format(threshold)
+        elif i == 1:
+            op = " > {}".format(threshold)
+        node.append_condition("{}{} {}".format(prev_split_name, op, divided_dist_result[i]))
 
     def clean_up(self):
         for attr in self._dtree.attributes:

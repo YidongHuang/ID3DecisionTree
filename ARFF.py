@@ -86,7 +86,7 @@ class ARFF:
                 elif stage == 1 and line[0:10].lower() == "@attribute":
                     spaced_line = line[10:].replace("\t", " ").strip()
                     splited_attr = spaced_line.split(" ")
-                    attr = Attribute(splited_attr[0])
+                    attr = Attribute(splited_attr[0].replace("'", ""))
                     attrs = spaced_line.replace(splited_attr[0], "").strip()
                     attrs = attrs.replace("{","").strip()
                     attrs = attrs.replace("}", "").strip()
