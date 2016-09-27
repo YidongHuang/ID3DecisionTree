@@ -4,20 +4,50 @@ import numpy as np
 import tree_node
 
 class Tree:
-    def __init__(self, fname, criterion):
-        self._dtree = ARFF.ARFF(fname)
+    def __init__(self, train_file, test_file, criterion):
+        self._dtree = ARFF.ARFF(train_file)
         self._classification_index = len(self._dtree.attributes) - 1
         self._pos_classification = self._dtree.attributes[self._classification_index].value[0]
         self._neg_classification = self._dtree.attributes[self._classification_index].value[1]
         self._criterion = int(criterion)
+        self._tree_node = ""
         self.clean_up()
         self.build_tree()
+        self._test_data = ARFF.ARFF(test_file).data
+        self.test_tree()
 
     def build_tree(self):
-        node = tree_node.Tree_node()
-        node.available_attr_index = range(len(self._dtree.attributes) - 1)
-        self.fill_split_condition(node, self._dtree.data)
-        node.print_tree("")
+        self._tree_node = tree_node.Tree_node()
+        self._tree_node.available_attr_index = range(len(self._dtree.attributes) - 1)
+        self.fill_split_condition(self._tree_node, self._dtree.data)
+        self._tree_node.print_tree("")
+
+    def test_tree(self):
+        print "<Predictions for the Test Set Instances>"
+        dict = {}
+        correct_classification = 0
+        for i in range(len(self._dtree.attributes) - 1):
+            dict[self._dtree.attributes[i].name] = i
+        for i in range(len(self._test_data)):
+            entry = self._test_data[i]
+            prediction = self.predict(entry, self._tree_node, dict)
+            print "{}: Actual: {} Predicted: {}".format(i + 1, entry[self._classification_index], prediction)
+            if prediction == entry[self._classification_index]:
+                correct_classification = correct_classification + 1
+        print "Number of correctly classified: {} Total number of test instances: {}".format(correct_classification, len(self._test_data))
+
+    def predict(self, entry, node, dict):
+        if node.name == self._neg_classification or node.name == self._pos_classification:
+            return node.name
+        index = dict[node.name]
+        if self._dtree.attributes[index].nominal:
+            attr_index = self._dtree.attributes[index].value.index(entry[index])
+            return self.predict(entry, node.children[attr_index], dict)
+        else:
+            if entry[index] <= node.threshold:
+                return self.predict(entry, node.children[0], dict)
+            else:
+                return self.predict(entry, node.children[1], dict)
 
     def cal_entropy(self, set):
         pos_res = 0
@@ -130,7 +160,7 @@ class Tree:
         for result_set in result_sets:
             entropy_dist_list = self.cal_entropy(result_set)
             entropy_list.append(entropy_dist_list[0])
-            dist_list.append([entropy_dist_list[1], entropy_dist_list[2]])
+            dist_list.append("[" + str(entropy_dist_list[1]) + " " + str(entropy_dist_list[2]) + "]")
         return [entropy_list, dist_list]
 
     def get_info_gain(self, set, entropy_list, result_sets, node):
@@ -165,7 +195,20 @@ class Tree:
         for i in range(len(divided_result_sets)):
             if node.children[i].entropy == 0 or len(divided_result_sets[i]) < self._criterion:
                 node.children[i].name = self.get_common_class(divided_result_sets[i])
+                if node.children[i].entropy == 1:
+                    parent_common_class = self._neg_classification
+                    common_class_count = 0
+                    total = 0
+                    for set in divided_result_sets:
+                        for j in set:
+                            total = total + 1
+                            if j[self._classification_index] == self._pos_classification:
+                                common_class_count = common_class_count + 1
+                    if common_class_count * 2 >= total:
+                        parent_common_class = self._pos_classification
+                    node.children[i].name = parent_common_class
                 node.children[i].append_condition(': {}'.format(node.children[i].name))
+                node.children[i].result = node.children[i].name
             else:
                 more_split.append(i)
         return more_split
@@ -177,9 +220,9 @@ class Tree:
         if tree_attributes.nominal:
             op = " = {}".format(self._dtree.attributes[index].value[i])
         elif i == 0:
-            op = " <= {}".format(threshold)
+            op = " <= {0:.6f}".format(threshold)
         elif i == 1:
-            op = " > {}".format(threshold)
+            op = " > {0:.6f}".format(threshold)
         node.append_condition("{}{} {}".format(prev_split_name, op, divided_dist_result[i]))
 
     def clean_up(self):

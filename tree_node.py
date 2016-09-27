@@ -67,7 +67,7 @@ class Tree_node:
 
     @property
     def condition(self):
-        self._condition
+        return self._condition
 
     def append_condition(self, addition):
         self._condition = self._condition + addition
@@ -75,6 +75,6 @@ class Tree_node:
     def print_tree(self, blank):
         if self._condition != '':
             print "{}{}".format(blank, self._condition)
-            blank = blank + " |       "
+            blank = blank + "|        "
         for child in self.children:
             child.print_tree("{}".format(blank))

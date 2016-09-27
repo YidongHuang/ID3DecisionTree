@@ -1,5 +1,4 @@
 import sys, traceback
-import pprint
 
 class Attribute:
     def __init__(self, name):
