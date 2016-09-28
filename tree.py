@@ -28,7 +28,7 @@ class Tree:
             prediction = self.predict(entry, self._tree_node, dict)
             if prediction == entry[self._classification_index]:
                 correct_classification = correct_classification + 1
-        return correct_classification
+        return correct_classification * 1.0/len(self._random_data)
 
 
     def build_tree(self):
