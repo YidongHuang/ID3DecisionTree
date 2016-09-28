@@ -1,10 +1,10 @@
 import ARFF
 import math as math
-import numpy as np
+import random
 import tree_node
 
 class Tree:
-    def __init__(self, train_file, test_file, criterion):
+    def __init__(self, train_file, criterion):
         self._dtree = ARFF.ARFF(train_file)
         self._classification_index = len(self._dtree.attributes) - 1
         self._pos_classification = self._dtree.attributes[self._classification_index].value[0]
@@ -13,8 +13,23 @@ class Tree:
         self._tree_node = ""
         self.clean_up()
         self.build_tree()
+
+    def load_test_file(self, test_file):
         self._test_data = ARFF.ARFF(test_file).data
-        self.test_tree()
+
+    def test_random_data(self, num):
+        self._random_data = random.sample(self._test_data, int(num * 1.0/100 * len(self._test_data)))
+        dict = {}
+        correct_classification = 0
+        for i in range(len(self._dtree.attributes) - 1):
+            dict[self._dtree.attributes[i].name] = i
+        for i in range(len(self._random_data)):
+            entry = self._random_data[i]
+            prediction = self.predict(entry, self._tree_node, dict)
+            if prediction == entry[self._classification_index]:
+                correct_classification = correct_classification + 1
+        return correct_classification
+
 
     def build_tree(self):
         self._tree_node = tree_node.Tree_node()
@@ -35,6 +50,7 @@ class Tree:
             if prediction == entry[self._classification_index]:
                 correct_classification = correct_classification + 1
         print "Number of correctly classified: {} Total number of test instances: {}".format(correct_classification, len(self._test_data))
+        return correct_classification
 
     def predict(self, entry, node, dict):
         if node.name == self._neg_classification or node.name == self._pos_classification:
