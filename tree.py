@@ -14,21 +14,12 @@ class Tree:
         self.clean_up()
         self.build_tree()
 
+
     def load_test_file(self, test_file):
         self._test_data = ARFF.ARFF(test_file).data
 
-    def test_random_data(self, num):
-        self._random_data = random.sample(self._test_data, int(num * 1.0/100 * len(self._test_data)))
-        dict = {}
-        correct_classification = 0
-        for i in range(len(self._dtree.attributes) - 1):
-            dict[self._dtree.attributes[i].name] = i
-        for i in range(len(self._random_data)):
-            entry = self._random_data[i]
-            prediction = self.predict(entry, self._tree_node, dict)
-            if prediction == entry[self._classification_index]:
-                correct_classification = correct_classification + 1
-        return correct_classification * 1.0/len(self._random_data)
+    def choose_random_data(self, num):
+        self._dtree.data = random.sample(self._dtree.data, int(num *1.0/100 *  len(self._dtree.data)))
 
 
     def build_tree(self):
